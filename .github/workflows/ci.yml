@@ -38,6 +38,10 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/duoc_connect
           SPRING_DATASOURCE_USERNAME: duoc
           SPRING_DATASOURCE_PASSWORD: duoc_secret
+          SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+          SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+          SPRING_FLYWAY_ENABLED: "true"
+          SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
         run: mvn -B verify
 
   frontend:
