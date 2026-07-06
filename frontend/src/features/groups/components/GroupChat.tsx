@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useGroupChatSocket } from '@/features/groups/hooks/useGroupChatSocket';
@@ -25,31 +25,37 @@ export function GroupChat({ grupoId }: GroupChatProps) {
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
 
-  const mensajesQuery = useQuery({
-    queryKey: ['grupo-mensajes', grupoId],
-    queryFn: () => getGrupoMensajes(grupoId),
-  });
-
-  useEffect(() => {
-    if (mensajesQuery.data?.content) {
-      setMensajes(sortMensajes(mensajesQuery.data.content));
-    }
-  }, [mensajesQuery.data?.content]);
-
-  const handleIncomingMessage = (incoming: MensajeGrupo) => {
+  const handleIncomingMessage = useCallback((incoming: MensajeGrupo) => {
     setMensajes((current) => {
       if (current.some((item) => item.id === incoming.id)) {
         return current;
       }
       return sortMensajes([...current, incoming]);
     });
-  };
+  }, []);
 
   const { connected, error: socketError, sendMessage } = useGroupChatSocket({
     grupoId,
     enabled: !!user,
     onMessage: handleIncomingMessage,
   });
+
+  const mensajesQuery = useQuery({
+    queryKey: ['grupo-mensajes', grupoId],
+    queryFn: () => getGrupoMensajes(grupoId),
+    refetchInterval: connected ? false : 4000,
+  });
+
+  useEffect(() => {
+    if (!mensajesQuery.data?.content) return;
+    const fromServer = mensajesQuery.data.content;
+    setMensajes((current) => {
+      const merged = new Map<string, MensajeGrupo>();
+      for (const item of fromServer) merged.set(item.id, item);
+      for (const item of current) merged.set(item.id, item);
+      return sortMensajes([...merged.values()]);
+    });
+  }, [mensajesQuery.data?.content]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
