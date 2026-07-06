@@ -15,4 +15,7 @@ public class LoginRequest {
 
     @NotBlank(message = "La contraseña es obligatoria")
     private String password;
+
+    @NotBlank(message = "El token de seguridad es obligatorio")
+    private String securityToken;
 }

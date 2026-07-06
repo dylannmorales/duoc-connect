@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 
 const navItems = [
   { to: '/', label: 'Inicio' },
@@ -66,6 +67,7 @@ export function Navbar() {
 
           {isAuthenticated && user ? (
             <>
+              <NotificationBell />
               <Link
                 to="/perfil"
                 className="hidden items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-100 sm:flex"

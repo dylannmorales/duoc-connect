@@ -130,8 +130,15 @@ export function QuestionDetailPage() {
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-bold">{pregunta.titulo}</h1>
             <p className="mt-4 whitespace-pre-wrap text-gray-700">{pregunta.contenido}</p>
+            {pregunta.imagenUrl && (
+              <img
+                src={pregunta.imagenUrl}
+                alt="Imagen adjunta"
+                className="mt-4 max-h-96 rounded-lg border border-gray-200 object-contain"
+              />
+            )}
             <div className="mt-4 flex flex-wrap gap-2 text-sm text-gray-500">
-              <span>{pregunta.asignaturaNombre}</span>
+              <span>{pregunta.asignaturaNombre ?? (pregunta.tematicaGeneral ? 'Otro' : 'Sin asignatura')}</span>
               <span>·</span>
               <span>{pregunta.carreraNombre}</span>
               <span>·</span>

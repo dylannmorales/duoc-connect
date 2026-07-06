@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getCarreras } from '@/features/auth/services/authService';
 import { CreateGroupModal } from '@/features/groups/components/CreateGroupModal';
+import { JoinByCodeModal } from '@/features/groups/components/JoinByCodeModal';
 import { GroupCard } from '@/features/groups/components/GroupCard';
 import { JoinGroupModal } from '@/features/groups/components/JoinGroupModal';
-import { createGrupo, joinGrupo, searchGrupos } from '@/features/groups/services/groupsService';
+import { createGrupo, joinGrupo, joinGrupoPorCodigo, buscarGrupoPorCodigo, searchGrupos } from '@/features/groups/services/groupsService';
 import type { CreateGrupoPayload, Grupo } from '@/features/groups/types/group.types';
 import { Button, FormAlert, Input, Select } from '@/shared/components/ui/FormControls';
 import { getApiErrorMessage } from '@/shared/utils/errors';
@@ -19,6 +20,7 @@ export function GroupsPage() {
   const [carreraId, setCarreraId] = useState('');
   const [page, setPage] = useState(0);
   const [showCreate, setShowCreate] = useState(false);
+  const [showJoinByCode, setShowJoinByCode] = useState(false);
   const [joinTarget, setJoinTarget] = useState<Grupo | null>(null);
   const [error, setError] = useState('');
 
@@ -41,12 +43,20 @@ export function GroupsPage() {
     try {
       const grupo = await createGrupo(payload);
       setPage(0);
+      queryClient.setQueryData(['grupo', grupo.id], grupo);
       await queryClient.invalidateQueries({ queryKey: ['grupos'] });
-      navigate(`/grupos/${grupo.id}`);
+      navigate(`/grupos/${grupo.id}`, { state: { grupo } });
     } catch (err) {
       setError(getApiErrorMessage(err));
       throw err;
     }
+  }
+
+  async function handleJoinByCode(codigo: string) {
+    setError('');
+    const grupo = await joinGrupoPorCodigo(codigo);
+    await queryClient.invalidateQueries({ queryKey: ['grupos'] });
+    navigate(`/grupos/${grupo.id}`, { state: { grupo } });
   }
 
   async function handleJoin(grupoId: string, codigo?: string) {
@@ -70,7 +80,12 @@ export function GroupsPage() {
           <h1 className="text-2xl font-bold">Grupos de estudio</h1>
           <p className="text-gray-600">Crea o únete a grupos para colaborar con tus compañeros</p>
         </div>
-        <Button onClick={() => setShowCreate(true)}>Crear grupo</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" onClick={() => setShowJoinByCode(true)}>
+            Unirse con código
+          </Button>
+          <Button onClick={() => setShowCreate(true)}>Crear grupo</Button>
+        </div>
       </div>
 
       {error && <FormAlert message={error} />}
@@ -137,6 +152,13 @@ export function GroupsPage() {
           </Button>
         </div>
       )}
+
+      <JoinByCodeModal
+        open={showJoinByCode}
+        onClose={() => setShowJoinByCode(false)}
+        onPreview={buscarGrupoPorCodigo}
+        onJoin={handleJoinByCode}
+      />
 
       <CreateGroupModal
         open={showCreate}

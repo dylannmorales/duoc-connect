@@ -61,6 +61,18 @@ export async function deleteAdminApunte(id: string): Promise<void> {
   await apiClient.delete(`/admin/apuntes/${id}`);
 }
 
+export async function downloadAdminApunte(id: string, filename: string) {
+  const response = await apiClient.get(`/admin/apuntes/${id}/descargar`, {
+    responseType: 'blob',
+  });
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  window.URL.revokeObjectURL(url);
+}
+
 export async function listAdminPreguntas(page = 0, size = 20): Promise<PageResponse<AdminPregunta>> {
   const { data } = await apiClient.get<ApiResponse<PageResponse<AdminPregunta>>>(
     '/admin/foro/preguntas',

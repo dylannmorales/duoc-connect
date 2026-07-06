@@ -20,9 +20,10 @@ public class CreatePreguntaRequest {
     @Size(max = 5000, message = "El contenido no puede superar 5000 caracteres")
     private String contenido;
 
-    @NotNull(message = "La asignatura es obligatoria")
-    private UUID asignaturaId;
-
     @NotNull(message = "La carrera es obligatoria")
     private UUID carreraId;
+
+    private UUID asignaturaId;
+
+    private Boolean tematicaGeneral;
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getCarreras } from '@/features/auth/services/authService';
 import { getAsignaturas } from '@/features/groups/services/groupsService';
 import { CreateQuestionModal } from '@/features/forum/components/CreateQuestionModal';
@@ -42,10 +42,10 @@ export function ForumPage() {
       }),
   });
 
-  async function handleCreate(payload: CreatePreguntaPayload) {
+  async function handleCreate(payload: CreatePreguntaPayload, imagen?: File) {
     setError('');
     try {
-      const pregunta = await createPregunta(payload);
+      const pregunta = await createPregunta(payload, imagen);
       setPage(0);
       await queryClient.invalidateQueries({ queryKey: ['preguntas'] });
       navigate(`/foro/${pregunta.id}`);

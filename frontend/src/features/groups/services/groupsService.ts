@@ -35,6 +35,18 @@ export async function joinGrupo(id: string, codigoInvitacion?: string) {
   return data.data;
 }
 
+export async function buscarGrupoPorCodigo(codigo: string) {
+  const { data } = await apiClient.get<ApiResponse<Grupo>>(`/grupos/codigo/${codigo}`);
+  return data.data;
+}
+
+export async function joinGrupoPorCodigo(codigo: string) {
+  const { data } = await apiClient.post<ApiResponse<Grupo>>('/grupos/unirse-por-codigo', {
+    codigoInvitacion: codigo,
+  });
+  return data.data;
+}
+
 export async function leaveGrupo(id: string) {
   await apiClient.delete(`/grupos/${id}/salir`);
 }

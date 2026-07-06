@@ -9,6 +9,7 @@ interface AdminModerationCardProps {
   onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onDownload?: () => void;
   deleteLabel?: string;
 }
 
@@ -20,6 +21,7 @@ export function AdminModerationCard({
   onView,
   onEdit,
   onDelete,
+  onDownload,
   deleteLabel = 'Eliminar',
 }: AdminModerationCardProps) {
   return (
@@ -38,6 +40,11 @@ export function AdminModerationCard({
           <Button variant="secondary" onClick={onEdit}>
             Editar
           </Button>
+          {onDownload && (
+            <Button variant="secondary" onClick={onDownload}>
+              Descargar PDF
+            </Button>
+          )}
           <Button variant="danger" onClick={onDelete}>
             {deleteLabel}
           </Button>

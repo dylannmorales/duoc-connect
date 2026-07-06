@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { getCarreras, getSedes } from '@/features/auth/services/authService';
+import { getCarreras, getFormSecurityToken, getSedes } from '@/features/auth/services/authService';
 import { Button, FormAlert, Input, Select } from '@/shared/components/ui/FormControls';
 import { getApiErrorMessage } from '@/shared/utils/errors';
 
@@ -18,6 +18,11 @@ export function RegisterPage() {
   const [semestre, setSemestre] = useState('1');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [securityToken, setSecurityToken] = useState('');
+
+  useEffect(() => {
+    getFormSecurityToken().then((data) => setSecurityToken(data.token)).catch(() => {});
+  }, []);
 
   const carrerasQuery = useQuery({ queryKey: ['carreras'], queryFn: getCarreras });
   const sedesQuery = useQuery({ queryKey: ['sedes'], queryFn: getSedes });
@@ -35,10 +40,12 @@ export function RegisterPage() {
         carreraId,
         sedeId,
         semestre: Number(semestre),
+        securityToken,
       });
-      navigate('/perfil', { replace: true });
+      navigate('/', { replace: true });
     } catch (err) {
       setError(getApiErrorMessage(err, 'No se pudo completar el registro'));
+      getFormSecurityToken().then((data) => setSecurityToken(data.token)).catch(() => {});
     } finally {
       setLoading(false);
     }

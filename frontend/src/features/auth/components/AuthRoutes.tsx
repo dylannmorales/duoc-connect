@@ -33,7 +33,7 @@ export function GuestRoute({ children }: { children: ReactNode }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/perfil" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

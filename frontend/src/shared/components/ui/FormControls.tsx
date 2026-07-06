@@ -1,4 +1,3 @@
-import { getApiErrorMessage } from '@/shared/utils/errors';
 import type { ButtonHTMLAttributes } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

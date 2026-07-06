@@ -65,6 +65,7 @@ export interface AuthData {
 export interface LoginPayload {
   email: string;
   password: string;
+  securityToken: string;
 }
 
 export interface RegisterPayload {
@@ -74,6 +75,7 @@ export interface RegisterPayload {
   carreraId: string;
   sedeId: string;
   semestre: number;
+  securityToken: string;
 }
 
 export interface UpdateProfilePayload {

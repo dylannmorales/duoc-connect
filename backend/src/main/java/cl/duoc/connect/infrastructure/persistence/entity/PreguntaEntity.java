@@ -35,12 +35,18 @@ public class PreguntaEntity {
     private UsuarioEntity usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "asignatura_id", nullable = false)
+    @JoinColumn(name = "asignatura_id")
     private AsignaturaEntity asignatura;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "carrera_id", nullable = false)
     private CarreraEntity carrera;
+
+    @Column(name = "tematica_general", nullable = false)
+    private Boolean tematicaGeneral;
+
+    @Column(name = "imagen_url", length = 500)
+    private String imagenUrl;
 
     @Column(nullable = false)
     private Integer votos;
@@ -61,6 +67,9 @@ public class PreguntaEntity {
         updatedAt = now;
         if (votos == null) {
             votos = 0;
+        }
+        if (tematicaGeneral == null) {
+            tematicaGeneral = false;
         }
     }
 

@@ -22,6 +22,8 @@ public class PreguntaResponse {
     private final String carreraNombre;
     private final UUID asignaturaId;
     private final String asignaturaNombre;
+    private final boolean tematicaGeneral;
+    private final String imagenUrl;
     private final Integer votos;
     private final boolean votadoPorMi;
     private final long totalRespuestas;

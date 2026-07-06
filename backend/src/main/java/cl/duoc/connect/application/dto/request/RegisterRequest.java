@@ -39,4 +39,7 @@ public class RegisterRequest {
     @Min(value = 1, message = "El semestre mínimo es 1")
     @Max(value = 12, message = "El semestre máximo es 12")
     private Short semestre;
+
+    @NotBlank(message = "El token de seguridad es obligatorio")
+    private String securityToken;
 }

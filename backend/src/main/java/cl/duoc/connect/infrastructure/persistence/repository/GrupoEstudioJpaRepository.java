@@ -15,6 +15,9 @@ public interface GrupoEstudioJpaRepository extends JpaRepository<GrupoEstudioEnt
 
     boolean existsByCodigoInvitacion(String codigoInvitacion);
 
+    @EntityGraph(attributePaths = {"carrera", "creador", "asignatura"})
+    Optional<GrupoEstudioEntity> findByCodigoInvitacionIgnoreCase(String codigoInvitacion);
+
     @Query("""
             SELECT g FROM GrupoEstudioEntity g
             JOIN FETCH g.carrera

@@ -38,6 +38,7 @@ public class LocalFileStorageAdapter implements FileStoragePort {
         try {
             Files.createDirectories(uploadRoot.resolve("profiles"));
             Files.createDirectories(uploadRoot.resolve("apuntes"));
+            Files.createDirectories(uploadRoot.resolve("foro"));
         } catch (IOException ex) {
             throw new IllegalStateException("No se pudo crear el directorio de uploads", ex);
         }
@@ -58,6 +59,23 @@ public class LocalFileStorageAdapter implements FileStoragePort {
         } catch (IOException ex) {
             log.error("Error al guardar foto de perfil", ex);
             throw new BusinessException("FILE_UPLOAD_ERROR", "No se pudo guardar la foto de perfil");
+        }
+    }
+
+    @Override
+    public String storeForoImage(MultipartFile file) {
+        validateImage(file);
+
+        String extension = resolveImageExtension(file);
+        String filename = UUID.randomUUID() + extension;
+        Path target = uploadRoot.resolve("foro").resolve(filename);
+
+        try {
+            storeToPath(file, target);
+            return "/uploads/foro/" + filename;
+        } catch (IOException ex) {
+            log.error("Error al guardar imagen del foro", ex);
+            throw new BusinessException("FILE_UPLOAD_ERROR", "No se pudo guardar la imagen");
         }
     }
 

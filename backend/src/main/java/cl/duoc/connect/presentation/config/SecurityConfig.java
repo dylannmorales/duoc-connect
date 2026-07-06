@@ -35,7 +35,8 @@ public class SecurityConfig {
             "/api-docs",
             "/api-docs/**",
             "/v3/api-docs/**",
-            "/ws/**"
+            "/ws/**",
+            "/ws-native"
     };
 
     private final JwtAuthFilter jwtAuthFilter;

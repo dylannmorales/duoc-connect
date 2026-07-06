@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { GroupChat } from '@/features/groups/components/GroupChat';
 import { MemberList } from '@/features/groups/components/MemberList';
 import { getGrupo, leaveGrupo } from '@/features/groups/services/groupsService';
+import { shareGroupInvitation } from '@/features/groups/utils/shareGroup';
+import type { Grupo } from '@/features/groups/types/group.types';
 import { Button, FormAlert } from '@/shared/components/ui/FormControls';
 import { getApiErrorMessage } from '@/shared/utils/errors';
 
 export function GroupDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const initialGrupo = (location.state as { grupo?: Grupo } | null)?.grupo;
   const [error, setError] = useState('');
   const [leaving, setLeaving] = useState(false);
 
@@ -18,6 +22,7 @@ export function GroupDetailPage() {
     queryKey: ['grupo', id],
     queryFn: () => getGrupo(id!),
     enabled: !!id,
+    initialData: initialGrupo?.id === id ? initialGrupo : undefined,
   });
 
   const grupo = grupoQuery.data;
@@ -77,8 +82,17 @@ export function GroupDetailPage() {
 
         <div className="flex flex-wrap gap-2">
           {grupo.codigoInvitacion && (
-            <div className="rounded-lg bg-gray-100 px-3 py-2 text-sm">
-              Código: <span className="font-mono font-bold">{grupo.codigoInvitacion}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="rounded-lg bg-gray-100 px-3 py-2 text-sm">
+                Código: <span className="font-mono font-bold">{grupo.codigoInvitacion}</span>
+              </div>
+              <Button
+                variant="secondary"
+                className="!py-2 !text-xs"
+                onClick={() => shareGroupInvitation(grupo.nombre, grupo.codigoInvitacion!)}
+              >
+                Compartir por Gmail
+              </Button>
             </div>
           )}
           <Button variant="secondary" onClick={handleLeave} loading={leaving}>

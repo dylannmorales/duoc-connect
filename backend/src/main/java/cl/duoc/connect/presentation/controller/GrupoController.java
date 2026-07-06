@@ -3,6 +3,7 @@ package cl.duoc.connect.presentation.controller;
 import cl.duoc.connect.application.dto.request.CreateGrupoRequest;
 import cl.duoc.connect.application.dto.request.EnviarMensajeRequest;
 import cl.duoc.connect.application.dto.request.UnirseGrupoRequest;
+import cl.duoc.connect.application.dto.request.UnirsePorCodigoRequest;
 import cl.duoc.connect.application.dto.response.ApiResponse;
 import cl.duoc.connect.application.dto.response.GrupoResponse;
 import cl.duoc.connect.application.dto.response.MensajeGrupoResponse;
@@ -59,6 +60,18 @@ public class GrupoController {
     @Operation(summary = "Obtener detalle de un grupo")
     public ApiResponse<GrupoResponse> obtenerGrupo(@PathVariable UUID id) {
         return ApiResponse.ok(grupoService.obtenerGrupo(id));
+    }
+
+    @GetMapping("/codigo/{codigo}")
+    @Operation(summary = "Buscar grupo por código de invitación")
+    public ApiResponse<GrupoResponse> buscarPorCodigo(@PathVariable String codigo) {
+        return ApiResponse.ok(grupoService.buscarPorCodigo(codigo));
+    }
+
+    @PostMapping("/unirse-por-codigo")
+    @Operation(summary = "Unirse a un grupo público o privado mediante código")
+    public ApiResponse<GrupoResponse> unirsePorCodigo(@Valid @RequestBody UnirsePorCodigoRequest request) {
+        return ApiResponse.ok(grupoService.unirsePorCodigo(request.getCodigoInvitacion()), "Te has unido al grupo");
     }
 
     @PostMapping("/{id}/unirse")

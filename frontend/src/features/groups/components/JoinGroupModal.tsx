@@ -15,10 +15,12 @@ export function JoinGroupModal({ grupo, open, onClose, onJoin }: JoinGroupModalP
 
   if (!open || !grupo) return null;
 
+  const currentGrupo = grupo;
+
   async function handleJoin() {
     setLoading(true);
     try {
-      await onJoin(grupo.id, grupo.privado ? codigo : undefined);
+      await onJoin(currentGrupo.id, currentGrupo.privado ? codigo : undefined);
       setCodigo('');
       onClose();
     } finally {
@@ -29,14 +31,14 @@ export function JoinGroupModal({ grupo, open, onClose, onJoin }: JoinGroupModalP
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <h2 className="mb-2 text-xl font-bold">Unirse a {grupo.nombre}</h2>
+        <h2 className="mb-2 text-xl font-bold">Unirse a {currentGrupo.nombre}</h2>
         <p className="mb-6 text-sm text-gray-600">
-          {grupo.privado
+          {currentGrupo.privado
             ? 'Este grupo es privado. Ingresa el código de invitación.'
             : '¿Confirmas que quieres unirte a este grupo público?'}
         </p>
 
-        {grupo.privado && (
+        {currentGrupo.privado && (
           <Input
             label="Código de invitación"
             name="codigo"

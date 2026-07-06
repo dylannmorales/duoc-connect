@@ -7,6 +7,7 @@ import cl.duoc.connect.application.dto.response.PreguntaResponse;
 import cl.duoc.connect.application.dto.response.RespuestaResponse;
 import cl.duoc.connect.application.dto.response.VotoResponse;
 import cl.duoc.connect.application.mapper.ForoMapper;
+import cl.duoc.connect.application.port.out.FileStoragePort;
 import cl.duoc.connect.domain.exception.BusinessException;
 import cl.duoc.connect.domain.exception.EntityNotFoundException;
 import cl.duoc.connect.infrastructure.persistence.entity.AsignaturaEntity;
@@ -36,6 +37,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -51,19 +54,27 @@ public class ForoService {
     private final AsignaturaJpaRepository asignaturaRepository;
     private final UsuarioJpaRepository usuarioRepository;
     private final ForoMapper foroMapper;
+    private final FileStoragePort fileStoragePort;
 
     @Transactional
-    public PreguntaResponse crearPregunta(CreatePreguntaRequest request) {
+    public PreguntaResponse crearPregunta(CreatePreguntaRequest request, MultipartFile imagen) {
         UsuarioEntity usuario = getCurrentUsuario();
 
         CarreraEntity carrera = carreraRepository.findById(request.getCarreraId())
                 .orElseThrow(() -> new BusinessException("CARRERA_NOT_FOUND", "Carrera no encontrada"));
 
-        AsignaturaEntity asignatura = asignaturaRepository.findById(request.getAsignaturaId())
-                .orElseThrow(() -> new BusinessException("ASIGNATURA_NOT_FOUND", "Asignatura no encontrada"));
+        boolean tematicaGeneral = Boolean.TRUE.equals(request.getTematicaGeneral());
 
-        if (!asignatura.getCarrera().getId().equals(carrera.getId())) {
-            throw new BusinessException("ASIGNATURA_INVALID", "La asignatura no pertenece a la carrera seleccionada");
+        AsignaturaEntity asignatura = null;
+        if (!tematicaGeneral) {
+            if (request.getAsignaturaId() == null) {
+                throw new BusinessException("ASIGNATURA_REQUIRED", "Debes seleccionar una asignatura o marcar la opción Otro");
+            }
+            asignatura = asignaturaRepository.findById(request.getAsignaturaId())
+                    .orElseThrow(() -> new BusinessException("ASIGNATURA_NOT_FOUND", "Asignatura no encontrada"));
+            if (!asignatura.getCarrera().getId().equals(carrera.getId())) {
+                throw new BusinessException("ASIGNATURA_INVALID", "La asignatura no pertenece a la carrera seleccionada");
+            }
         }
 
         PreguntaEntity pregunta = new PreguntaEntity();
@@ -72,6 +83,11 @@ public class ForoService {
         pregunta.setUsuario(usuario);
         pregunta.setCarrera(carrera);
         pregunta.setAsignatura(asignatura);
+        pregunta.setTematicaGeneral(tematicaGeneral);
+
+        if (imagen != null && !imagen.isEmpty()) {
+            pregunta.setImagenUrl(fileStoragePort.storeForoImage(imagen));
+        }
 
         PreguntaEntity saved = preguntaRepository.save(pregunta);
         saved.setUsuario(usuario);

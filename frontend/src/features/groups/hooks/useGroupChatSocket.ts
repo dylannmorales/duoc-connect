@@ -1,9 +1,15 @@
 import { Client, type IMessage } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MensajeGrupo } from '@/features/groups/types/group.types';
 
-const WS_URL = import.meta.env.VITE_WS_URL ?? '/ws';
+function resolveWebSocketUrl() {
+  const configured = import.meta.env.VITE_WS_URL;
+  if (configured && configured.startsWith('ws')) {
+    return configured.replace(/\/ws\/?$/, '/ws-native');
+  }
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${protocol}//${window.location.host}/ws-native`;
+}
 
 interface UseGroupChatSocketOptions {
   grupoId: string;
@@ -33,7 +39,7 @@ export function useGroupChatSocket({ grupoId, enabled = true, onMessage }: UseGr
     }
 
     const client = new Client({
-      webSocketFactory: () => new SockJS(WS_URL),
+      brokerURL: resolveWebSocketUrl(),
       connectHeaders: {
         Authorization: `Bearer ${token}`,
       },

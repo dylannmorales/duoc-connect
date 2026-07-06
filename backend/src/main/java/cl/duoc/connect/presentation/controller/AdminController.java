@@ -20,12 +20,17 @@ import cl.duoc.connect.application.dto.response.AdminUsuarioResponse;
 import cl.duoc.connect.application.dto.response.ApiResponse;
 import cl.duoc.connect.application.dto.response.PageResponse;
 import cl.duoc.connect.application.service.AdminService;
+import cl.duoc.connect.application.service.ApunteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +53,7 @@ import java.util.UUID;
 public class AdminController {
 
     private final AdminService adminService;
+    private final ApunteService apunteService;
 
     @GetMapping("/stats")
     @Operation(summary = "Estadísticas generales de la plataforma")
@@ -106,6 +112,17 @@ public class AdminController {
     @Operation(summary = "Eliminar un apunte")
     public void eliminarApunte(@PathVariable UUID id) {
         adminService.eliminarApunte(id);
+    }
+
+    @GetMapping("/apuntes/{id}/descargar")
+    @Operation(summary = "Descargar PDF de un apunte")
+    public ResponseEntity<Resource> descargarApunte(@PathVariable UUID id) {
+        ApunteService.DownloadFile download = apunteService.descargarApunte(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + download.filename() + "\"")
+                .body(download.resource());
     }
 
     @GetMapping("/foro/preguntas")

@@ -24,7 +24,7 @@ export function QuestionCard({ pregunta }: QuestionCardProps) {
           <p className="mt-2 line-clamp-2 text-sm text-gray-600">{pregunta.contenido}</p>
 
           <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-            <span>{pregunta.asignaturaNombre}</span>
+            <span>{pregunta.asignaturaNombre ?? (pregunta.tematicaGeneral ? 'Otro' : 'Sin asignatura')}</span>
             <span>·</span>
             <span>{pregunta.carreraNombre}</span>
             <span>·</span>

@@ -55,6 +55,7 @@ public class GrupoService {
     private final UsuarioJpaRepository usuarioRepository;
     private final GrupoMapper grupoMapper;
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificacionService notificacionService;
 
     @Transactional
     public GrupoResponse crearGrupo(CreateGrupoRequest request) {
@@ -115,6 +116,27 @@ public class GrupoService {
         GrupoEstudioEntity grupo = findGrupoWithDetails(grupoId);
         validarAccesoGrupo(grupo, usuarioId);
         return toGrupoResponse(grupo, usuarioId);
+    }
+
+    @Transactional(readOnly = true)
+    public GrupoResponse buscarPorCodigo(String codigo) {
+        String codigoNormalizado = codigo.trim().toUpperCase();
+        GrupoEstudioEntity grupo = grupoRepository.findByCodigoInvitacionIgnoreCase(codigoNormalizado)
+                .orElseThrow(() -> new BusinessException("INVALID_CODE", "Código de invitación inválido"));
+
+        UUID usuarioId = getCurrentUserId();
+        return toGrupoResponse(grupo, usuarioId);
+    }
+
+    @Transactional
+    public GrupoResponse unirsePorCodigo(String codigo) {
+        String codigoNormalizado = codigo.trim().toUpperCase();
+        GrupoEstudioEntity grupo = grupoRepository.findByCodigoInvitacionIgnoreCase(codigoNormalizado)
+                .orElseThrow(() -> new BusinessException("INVALID_CODE", "Código de invitación inválido"));
+
+        UnirseGrupoRequest joinRequest = new UnirseGrupoRequest();
+        joinRequest.setCodigoInvitacion(codigoNormalizado);
+        return unirseGrupo(grupo.getId(), joinRequest);
     }
 
     @Transactional
@@ -214,6 +236,15 @@ public class GrupoService {
         saved.setUsuario(usuario);
         MensajeGrupoResponse response = grupoMapper.toMensajeResponse(saved);
         messagingTemplate.convertAndSend("/topic/grupos/" + grupoId, response);
+
+        miembroRepository.findByGrupoIdWithUsuario(grupoId).stream()
+                .filter(m -> !m.getUsuario().getId().equals(usuario.getId()))
+                .forEach(m -> notificacionService.notificarMensajeGrupo(
+                        m.getUsuario().getId(),
+                        grupo.getNombre(),
+                        usuario.getNombre(),
+                        grupoId));
+
         return response;
     }
 

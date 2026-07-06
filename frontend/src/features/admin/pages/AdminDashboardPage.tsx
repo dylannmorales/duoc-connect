@@ -4,6 +4,7 @@ import { AdminEditModal, type EditItem } from '@/features/admin/components/Admin
 import { AdminModerationCard } from '@/features/admin/components/AdminModerationCard';
 import {
   deleteAdminApunte,
+  downloadAdminApunte,
   deleteAdminFotoPerfil,
   deleteAdminGrupo,
   deleteAdminMensaje,
@@ -30,9 +31,6 @@ import {
 } from '@/features/admin/services/adminService';
 import type {
   AdminFotoPerfil,
-  AdminGrupo,
-  AdminMensaje,
-  AdminPerfilProyecto,
   PageResponse,
 } from '@/features/admin/types/admin.types';
 import type { VisibilidadPerfil } from '@/features/companions/types/companion.types';
@@ -410,6 +408,12 @@ export function AdminDashboardPage() {
               meta={`${apunte.carreraNombre} · ${formatDate(apunte.createdAt)}`}
               onView={() => setViewItem({ type: 'apunte', data: apunte })}
               onEdit={() => setEditItem({ type: 'apunte', data: apunte })}
+              onDownload={() => {
+                setError('');
+                downloadAdminApunte(apunte.id, apunte.nombreArchivo).catch((err) =>
+                  setError(getApiErrorMessage(err, 'No se pudo descargar el PDF')),
+                );
+              }}
               onDelete={() => confirmDelete('¿Eliminar este apunte?', () => {
                 setError('');
                 deleteApunteMutation.mutate(apunte.id);

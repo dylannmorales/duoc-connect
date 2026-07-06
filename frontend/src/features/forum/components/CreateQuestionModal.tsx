@@ -8,7 +8,7 @@ import { Button, Input, Select } from '@/shared/components/ui/FormControls';
 interface CreateQuestionModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (payload: CreatePreguntaPayload) => Promise<void>;
+  onSubmit: (payload: CreatePreguntaPayload, imagen?: File) => Promise<void>;
 }
 
 export function CreateQuestionModal({ open, onClose, onSubmit }: CreateQuestionModalProps) {
@@ -16,13 +16,15 @@ export function CreateQuestionModal({ open, onClose, onSubmit }: CreateQuestionM
   const [contenido, setContenido] = useState('');
   const [carreraId, setCarreraId] = useState('');
   const [asignaturaId, setAsignaturaId] = useState('');
+  const [tematicaGeneral, setTematicaGeneral] = useState(false);
+  const [imagen, setImagen] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   const carrerasQuery = useQuery({ queryKey: ['carreras'], queryFn: getCarreras });
   const asignaturasQuery = useQuery({
     queryKey: ['asignaturas', carreraId],
     queryFn: () => getAsignaturas(carreraId),
-    enabled: !!carreraId,
+    enabled: !!carreraId && !tematicaGeneral,
   });
 
   if (!open) return null;
@@ -31,11 +33,22 @@ export function CreateQuestionModal({ open, onClose, onSubmit }: CreateQuestionM
     event.preventDefault();
     setLoading(true);
     try {
-      await onSubmit({ titulo, contenido, carreraId, asignaturaId });
+      await onSubmit(
+        {
+          titulo,
+          contenido,
+          carreraId,
+          asignaturaId: tematicaGeneral ? undefined : asignaturaId,
+          tematicaGeneral,
+        },
+        imagen ?? undefined,
+      );
       setTitulo('');
       setContenido('');
       setCarreraId('');
       setAsignaturaId('');
+      setTematicaGeneral(false);
+      setImagen(null);
       onClose();
     } finally {
       setLoading(false);
@@ -89,14 +102,43 @@ export function CreateQuestionModal({ open, onClose, onSubmit }: CreateQuestionM
             required
           />
 
-          <Select
-            label="Asignatura"
-            name="asignaturaId"
-            value={asignaturaId}
-            onChange={(e) => setAsignaturaId(e.target.value)}
-            options={(asignaturasQuery.data ?? []).map((a) => ({ value: a.id, label: a.nombre }))}
-            required
-          />
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={tematicaGeneral}
+              onChange={(e) => {
+                setTematicaGeneral(e.target.checked);
+                if (e.target.checked) setAsignaturaId('');
+              }}
+              className="rounded border-gray-300"
+            />
+            Otro (pregunta no relacionada a una asignatura específica)
+          </label>
+
+          {!tematicaGeneral && (
+            <Select
+              label="Asignatura"
+              name="asignaturaId"
+              value={asignaturaId}
+              onChange={(e) => setAsignaturaId(e.target.value)}
+              options={(asignaturasQuery.data ?? []).map((a) => ({ value: a.id, label: a.nombre }))}
+              required
+            />
+          )}
+
+          <div className="space-y-1">
+            <label htmlFor="imagen" className="block text-sm font-medium text-gray-700">
+              Imagen (opcional)
+            </label>
+            <input
+              id="imagen"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => setImagen(e.target.files?.[0] ?? null)}
+              className="w-full text-sm text-gray-600"
+            />
+            {imagen && <p className="text-xs text-gray-500">Archivo: {imagen.name}</p>}
+          </div>
 
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={onClose}>

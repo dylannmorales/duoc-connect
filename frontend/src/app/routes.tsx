@@ -17,7 +17,7 @@ import { MainLayout } from '@/shared/components/layout/MainLayout';
 
 export function AppRoutes() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route element={<MainLayout />}>
           <Route index element={<HomePage />} />

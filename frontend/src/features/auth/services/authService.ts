@@ -12,6 +12,13 @@ import type {
   Usuario,
 } from '@/shared/types/api.types';
 
+export async function getFormSecurityToken() {
+  const { data } = await apiClient.get<ApiResponse<{ token: string; expiresInSeconds: number }>>(
+    '/auth/form-token',
+  );
+  return data.data;
+}
+
 export async function login(payload: LoginPayload) {
   const { data } = await apiClient.post<ApiResponse<AuthData>>('/auth/login', payload);
   return data.data;

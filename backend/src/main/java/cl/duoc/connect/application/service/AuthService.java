@@ -46,12 +46,14 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UsuarioMapper usuarioMapper;
     private final EmailPort emailPort;
+    private final FormSecurityTokenService formSecurityTokenService;
 
     @Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
+        formSecurityTokenService.validateAndConsume(request.getSecurityToken());
         String email = request.getEmail().trim().toLowerCase();
 
         if (usuarioRepository.existsByEmailIgnoreCase(email)) {
@@ -79,6 +81,7 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
+        formSecurityTokenService.validateAndConsume(request.getSecurityToken());
         String email = request.getEmail().trim().toLowerCase();
 
         authenticationManager.authenticate(

@@ -6,8 +6,10 @@ export interface Pregunta {
   usuarioNombre: string;
   carreraId: string;
   carreraNombre: string;
-  asignaturaId: string;
-  asignaturaNombre: string;
+  asignaturaId: string | null;
+  asignaturaNombre: string | null;
+  tematicaGeneral: boolean;
+  imagenUrl: string | null;
   votos: number;
   votadoPorMi: boolean;
   totalRespuestas: number;
@@ -31,7 +33,8 @@ export interface CreatePreguntaPayload {
   titulo: string;
   contenido: string;
   carreraId: string;
-  asignaturaId: string;
+  asignaturaId?: string;
+  tematicaGeneral?: boolean;
 }
 
 export interface VotoResult {

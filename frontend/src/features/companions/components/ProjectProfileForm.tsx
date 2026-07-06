@@ -9,7 +9,7 @@ import type {
   UpdatePerfilProyectoPayload,
   VisibilidadPerfil,
 } from '@/features/companions/types/companion.types';
-import { DIAS_SEMANA, NIVELES_HABILIDAD } from '@/features/companions/utils/constants';
+import { DIAS_SEMANA, HORARIO_PRESETS, NIVELES_HABILIDAD } from '@/features/companions/utils/constants';
 import { Button, Input, Select } from '@/shared/components/ui/FormControls';
 
 interface ProjectProfileFormProps {
@@ -47,10 +47,12 @@ export function ProjectProfileForm({ perfil, onSave }: ProjectProfileFormProps) 
     );
   }
 
-  function addDisponibilidad() {
+  function addDisponibilidad(preset?: (typeof HORARIO_PRESETS)[number]) {
     setDisponibilidades((prev) => [
       ...prev,
-      { diaSemana: 0, horaInicio: '09:00', horaFin: '12:00' },
+      preset
+        ? { diaSemana: 0, horaInicio: preset.horaInicio, horaFin: preset.horaFin }
+        : { diaSemana: 0, horaInicio: '09:00', horaFin: '12:00' },
     ]);
   }
 
@@ -212,44 +214,65 @@ export function ProjectProfileForm({ perfil, onSave }: ProjectProfileFormProps) 
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-medium text-gray-700">Horarios disponibles</p>
-          <Button type="button" variant="secondary" className="!py-1.5 !text-xs" onClick={addDisponibilidad}>
-            + Añadir horario
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {HORARIO_PRESETS.map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => addDisponibilidad(preset)}
+                className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600 hover:bg-gray-200"
+              >
+                + {preset.label}
+              </button>
+            ))}
+            <Button type="button" variant="secondary" className="!py-1.5 !text-xs" onClick={() => addDisponibilidad()}>
+              + Horario personalizado
+            </Button>
+          </div>
         </div>
+        {disponibilidades.length === 0 && (
+          <p className="text-xs text-gray-500">Agrega al menos un bloque horario para mejorar las recomendaciones.</p>
+        )}
         {disponibilidades.map((d, index) => (
-          <div key={index} className="flex flex-wrap items-center gap-2">
-            <select
-              value={d.diaSemana}
-              onChange={(e) => updateDisponibilidad(index, 'diaSemana', Number(e.target.value))}
-              className="rounded border border-gray-300 px-2 py-1.5 text-sm"
-            >
-              {DIAS_SEMANA.map((dia, i) => (
-                <option key={dia} value={i}>
-                  {dia}
-                </option>
-              ))}
-            </select>
+          <div key={index} className="flex flex-wrap items-end gap-2 rounded-lg border border-gray-100 bg-gray-50 p-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-600">Día</label>
+              <select
+                value={d.diaSemana}
+                onChange={(e) => updateDisponibilidad(index, 'diaSemana', Number(e.target.value))}
+                className="rounded border border-gray-300 px-2 py-1.5 text-sm"
+              >
+                {DIAS_SEMANA.map((dia, i) => (
+                  <option key={dia} value={i}>
+                    {dia}
+                  </option>
+                ))}
+              </select>
+            </div>
             <Input
-              label=""
+              label="Desde"
               name={`inicio-${index}`}
               type="time"
               value={d.horaInicio}
               onChange={(e) => updateDisponibilidad(index, 'horaInicio', e.target.value)}
               className="!w-auto"
             />
-            <span className="text-gray-400">a</span>
             <Input
-              label=""
+              label="Hasta"
               name={`fin-${index}`}
               type="time"
               value={d.horaFin}
               onChange={(e) => updateDisponibilidad(index, 'horaFin', e.target.value)}
               className="!w-auto"
             />
-            <button type="button" onClick={() => removeDisponibilidad(index)} className="text-sm text-red-500">
-              ✕
+            <button
+              type="button"
+              onClick={() => removeDisponibilidad(index)}
+              className="mb-2 text-sm text-red-500 hover:text-red-700"
+            >
+              Quitar
             </button>
           </div>
         ))}

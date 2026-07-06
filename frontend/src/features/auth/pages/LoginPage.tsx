@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { getFormSecurityToken } from '@/features/auth/services/authService';
 import { Button, FormAlert, Input } from '@/shared/components/ui/FormControls';
 import { getApiErrorMessage } from '@/shared/utils/errors';
 
@@ -8,7 +9,12 @@ export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: string } | null)?.from ?? '/perfil';
+  const from = (location.state as { from?: string } | null)?.from ?? '/';
+  const [securityToken, setSecurityToken] = useState('');
+
+  useEffect(() => {
+    getFormSecurityToken().then((data) => setSecurityToken(data.token)).catch(() => {});
+  }, []);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,10 +27,11 @@ export function LoginPage() {
     setLoading(true);
 
     try {
-      await login({ email, password });
+      await login({ email, password, securityToken });
       navigate(from, { replace: true });
     } catch (err) {
       setError(getApiErrorMessage(err, 'No se pudo iniciar sesión'));
+      getFormSecurityToken().then((data) => setSecurityToken(data.token)).catch(() => {});
     } finally {
       setLoading(false);
     }

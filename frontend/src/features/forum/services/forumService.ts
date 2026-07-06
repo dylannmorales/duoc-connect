@@ -21,8 +21,21 @@ export async function listPreguntas(params: {
   return data.data;
 }
 
-export async function createPregunta(payload: CreatePreguntaPayload) {
-  const { data } = await apiClient.post<ApiResponse<Pregunta>>('/foro/preguntas', payload);
+export async function createPregunta(payload: CreatePreguntaPayload, imagen?: File) {
+  const formData = new FormData();
+  formData.append('titulo', payload.titulo);
+  formData.append('contenido', payload.contenido);
+  formData.append('carreraId', payload.carreraId);
+  if (payload.asignaturaId) {
+    formData.append('asignaturaId', payload.asignaturaId);
+  }
+  formData.append('tematicaGeneral', String(Boolean(payload.tematicaGeneral)));
+  if (imagen) {
+    formData.append('imagen', imagen);
+  }
+  const { data } = await apiClient.post<ApiResponse<Pregunta>>('/foro/preguntas', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
   return data.data;
 }
 
